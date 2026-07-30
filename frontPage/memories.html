@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Alex+Brush&display=swap" rel="stylesheet">
+    <style>
+        /* Base Setup */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; 
+            box-sizing: border-box;
+            background-color: #38141f;
+        }
+
+        /* --- TRANSITION OVERLAY --- */
+        .page-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #38141f; 
+            z-index: 9999;             
+            pointer-events: auto;
+            opacity: 1; 
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .page-loaded .page-transition-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* FIXED STAGE CANVAS CONTAINER (Auto-Scales) */
+        .page-stage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1920px;  
+            height: 1080px; 
+            transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+            transform-origin: center center;
+            overflow: hidden;
+            z-index: 3;
+        }
+
+        /* --- PARALLAX BACKGROUND ENGINE --- */
+        .background-container {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 120vw; 
+            height: 120vh;
+            z-index: 1;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .bg-flower {
+            position: absolute;
+            height: auto;
+            pointer-events: none;
+            filter: drop-shadow(0px 10px 20px rgba(0, 0, 0, 0.15));
+        }
+
+        .flower-left { width: 2100px; left: -25%; top: 35%; z-index: 1; }
+        .flower-center { width: 2150px; left: 50%; top: -15%; transform: translateX(-50%); z-index: 2; }
+        .flower-right { width: 2000px; right: -25%; bottom: -20%; z-index: 1; }
+
+        /* --- RED TRANSLUCENT OVERLAY --- */
+        .tint-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(56, 20, 31, 0.725); 
+            z-index: 2; 
+            pointer-events: none; 
+        }
+
+        /* --- POLAROID HEART GRID CONTAINER --- */
+        .grid-container {
+            position: absolute;
+            top: 48%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: grid;
+            grid-template-columns: repeat(7, 170px);
+            grid-template-rows: repeat(5, 195px);
+            row-gap: 5px;       
+            column-gap: 0px;
+            z-index: 4;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Elevate entire grid above stickers (z-index: 10) when a card is open */
+        .grid-container:has(.open) {
+            z-index: 9999 !important;
+        }
+
+        /* STAGGERED ENTRANCE ANIMATIONS */
+        .polaroid-slot, .sticker {
+            opacity: 0;
+        }
+
+        @keyframes popInElement {
+            0% {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+            70% {
+                opacity: 1;
+                transform: scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .page-loaded .polaroid-slot { 
+            animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+        }
+        .page-loaded .sticker { 
+            animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s forwards; 
+        }
+
+        /* Slot staggered delays */
+        .page-loaded .polaroid-slot:nth-child(1)  { animation-delay: 0.05s; }
+        .page-loaded .polaroid-slot:nth-child(2)  { animation-delay: 0.10s; }
+        .page-loaded .polaroid-slot:nth-child(3)  { animation-delay: 0.15s; }
+        .page-loaded .polaroid-slot:nth-child(4)  { animation-delay: 0.20s; }
+        .page-loaded .polaroid-slot:nth-child(5)  { animation-delay: 0.25s; }
+        .page-loaded .polaroid-slot:nth-child(6)  { animation-delay: 0.30s; }
+        .page-loaded .polaroid-slot:nth-child(7)  { animation-delay: 0.35s; }
+        .page-loaded .polaroid-slot:nth-child(8)  { animation-delay: 0.40s; }
+        .page-loaded .polaroid-slot:nth-child(9)  { animation-delay: 0.45s; }
+        .page-loaded .polaroid-slot:nth-child(10) { animation-delay: 0.50s; }
+        .page-loaded .polaroid-slot:nth-child(11) { animation-delay: 0.55s; }
+        .page-loaded .polaroid-slot:nth-child(12) { animation-delay: 0.60s; }
+        .page-loaded .polaroid-slot:nth-child(13) { animation-delay: 0.65s; }
+        .page-loaded .polaroid-slot:nth-child(14) { animation-delay: 0.70s; }
+        .page-loaded .polaroid-slot:nth-child(15) { animation-delay: 0.75s; }
+        .page-loaded .polaroid-slot:nth-child(16) { animation-delay: 0.80s; }
+        .page-loaded .polaroid-slot:nth-child(17) { animation-delay: 0.85s; }
+        .page-loaded .polaroid-slot:nth-child(18) { animation-delay: 0.90s; }
+        .page-loaded .polaroid-slot:nth-child(19) { animation-delay: 0.95s; }
+        .page-loaded .polaroid-slot:nth-child(20) { animation-delay: 1.00s; }
+
+        /* --- POLAROID SLOT & CARD INTERACTION --- */
+        .polaroid-slot {
+            width: 170px;
+            height: 195px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: visible; 
+            position: relative;
+            z-index: 4;
+            cursor: pointer;
+            transition: z-index 0s, transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .polaroid-card {
+            width: 1700px;  
+            height: 1700px;
+            max-width: none; 
+            object-fit: contain;
+            pointer-events: none;
+            
+            image-rendering: -webkit-optimize-contrast;
+
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+
+            --base-scale: 1.15; 
+            transform: translate3d(var(--shift-x, 0px), var(--shift-y, 0px), 0px) scale(var(--base-scale));
+        }
+
+        /* Hover Lift */
+        .polaroid-slot:not(.open):hover .polaroid-card {
+            transform: translate3d(var(--shift-x, 0px), var(--shift-y, 0px), 0px) scale(calc(var(--base-scale) * 1.12));
+        }
+
+        .polaroid-slot:not(.open):hover {
+            z-index: 50 !important;
+        }
+
+        /* OPEN POP-OUT STATE POSITIONS */
+        .polaroid-slot.open {
+            z-index: 9999 !important;
+        }
+
+        .polaroid-slot.open .polaroid-card {
+            transform: translate3d(0px, 0px, 0px) scale(2.2) !important;
+            filter: drop-shadow(0px 25px 40px rgba(0, 0, 0, 0.8)) !important;
+        }
+
+        /* --- STICKERS & ACCENTS --- */
+        .sticker {
+            position: absolute;
+            height: auto;
+            pointer-events: none !important;
+            z-index: 10;
+            filter: drop-shadow(0px 8px 12px rgba(0, 0, 0, 0.35));
+        }
+
+        .sticker-kiss { 
+            width: 1850px; 
+            top: -310px; 
+            left: -400px; 
+            transform: translate(-920px, -620px) rotate(-5deg); 
+        }
+        .sticker-bow      { width: 1800px; top: 420px; left: 890px; }
+        .sticker-hearts   { width: 1800px; top: 200px; right: 520px; transform: rotate(10deg); }
+        .sticker-sparkles { width: 1800px; bottom: 230px; left: 500px; }
+        .sticker-stars    { width: 1800px; bottom: 260px; right: 520px; }
+
+        /* --- NAVIGATION BUTTONS --- */
+        .button-container {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            z-index: 20;
+            display: flex;
+            gap: 20px;
+        }
+
+        .click-btn {
+            background-color: #ffffff;
+            color: #5c1b26;
+            border: none;
+            border-radius: 60px;
+            padding: 18px 50px;
+            font-size: 28px;
+            cursor: pointer;
+            font-family: serif;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease-out;
+        }
+
+        .click-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- OVERLAY OUTSIDE STAGE TO COVER FULL SCREEN ON LOAD -->
+    <div class="page-transition-overlay" id="pageOverlay"></div>
+
+    <!-- PARALLAX BACKGROUND -->
+    <div class="background-container" id="parallaxBg">
+        <img src="18.png" class="bg-flower flower-left" alt="Left Flower Base">
+        <img src="19.png" class="bg-flower flower-center" alt="Center Layer Flower">
+        <img src="20.png" class="bg-flower flower-right" alt="Right Flower Base">
+    </div>
+    
+    <div class="tint-overlay"></div>
+
+    <!-- CANVAS STAGE WRAPPER -->
+    <div class="page-stage">
+
+        <!-- HEART GRID LAYOUT (47.png to 66.png) -->
+        <div class="grid-container" id="gridContainer">
+            
+            <!-- Row 1 -->
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 2; grid-row: 1;"><img src="47.png" class="polaroid-card" alt="Polaroid 47"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 3; grid-row: 1;"><img src="48.png" class="polaroid-card" alt="Polaroid 48"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 5; grid-row: 1;"><img src="49.png" class="polaroid-card" alt="Polaroid 49"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 6; grid-row: 1;"><img src="50.png" class="polaroid-card" alt="Polaroid 50"></div>
+
+            <!-- Row 2 -->
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 1; grid-row: 2;"><img src="51.png" class="polaroid-card" alt="Polaroid 51"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 2; grid-row: 2;"><img src="52.png" class="polaroid-card" alt="Polaroid 52"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 3; grid-row: 2;"><img src="53.png" class="polaroid-card" alt="Polaroid 53"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 4; grid-row: 2;"><img src="54.png" class="polaroid-card" alt="Polaroid 54"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 5; grid-row: 2;"><img src="55.png" class="polaroid-card" alt="Polaroid 55"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 6; grid-row: 2;"><img src="56.png" class="polaroid-card" alt="Polaroid 56"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 7; grid-row: 2;"><img src="57.png" class="polaroid-card" alt="Polaroid 57"></div>
+
+            <!-- Row 3 -->
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 2; grid-row: 3;"><img src="58.png" class="polaroid-card" alt="Polaroid 58"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 3; grid-row: 3;"><img src="59.png" class="polaroid-card" alt="Polaroid 59"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 4; grid-row: 3;"><img src="60.png" class="polaroid-card" alt="Polaroid 60"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 5; grid-row: 3;"><img src="61.png" class="polaroid-card" alt="Polaroid 61"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 6; grid-row: 3;"><img src="62.png" class="polaroid-card" alt="Polaroid 62"></div>
+
+            <!-- Row 4 -->
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 3; grid-row: 4;">
+                <img src="63.png" class="polaroid-card" style="--shift-x: 1px; --shift-y: 22px;" alt="Polaroid 63">
+            </div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 4; grid-row: 4;"><img src="64.png" class="polaroid-card" alt="Polaroid 64"></div>
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 5; grid-row: 4;"><img src="65.png" class="polaroid-card" alt="Polaroid 65"></div>
+
+            <!-- Row 5 -->
+            <div class="polaroid-slot" onclick="togglePhoto(this)" style="grid-column: 4; grid-row: 5;"><img src="66.png" class="polaroid-card" alt="Polaroid 66"></div>
+
+        </div>
+
+        <!-- STICKER OVERLAYS -->
+        <img src="43.png" class="sticker sticker-kiss" alt="Kiss Stamp">
+        <img src="44.png" class="sticker sticker-bow" style="top: -250px; left: -35px;" alt="Red Bow Accent">
+        <img src="45.png" class="sticker sticker-hearts" style="top: -300px; right: -400px;" alt="Paper Hearts Accent">
+        <img src="46.png" class="sticker sticker-sparkles" style="bottom: -140px; left: -250px;" alt="Sparkle Stars Accent">
+        <img src="42.png" class="sticker sticker-stars" style="bottom: -100px; right: -250px;" alt="Newspaper Stars Accent">
+
+        <!-- NAVIGATION BUTTONS -->
+        <div class="button-container">
+            <button class="click-btn" onclick="navigateToPage('choices.html')">BACK</button>
+            <button class="click-btn" onclick="navigateToPage('index.html')">HOME</button>
+        </div>
+
+    </div>
+
+    <script>
+        // Auto-Scale Canvas Function
+        function updateStageScale() {
+            const stage = document.querySelector('.page-stage');
+            if (stage) {
+                const scaleX = window.innerWidth / 1920;
+                const scaleY = window.innerHeight / 1080;
+                const scale = Math.min(scaleX, scaleY); 
+                stage.style.setProperty('--stage-scale', scale);
+            }
+        }
+
+        window.addEventListener('resize', updateStageScale);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateStageScale();
+            // Trigger page entrance fade-in
+            setTimeout(() => {
+                document.body.classList.add('page-loaded');
+            }, 100);
+        });
+
+        // Parallax Motion
+        const background = document.getElementById('parallaxBg');
+        let ticking = false;
+        document.addEventListener('mousemove', (e) => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const mouseX = e.clientX / window.innerWidth;
+                    const mouseY = e.clientY / window.innerHeight;
+
+                    const moveX = (mouseX - 0.5) * -35;
+                    const moveY = (mouseY - 0.5) * -35;
+
+                    background.style.transform = `translate3d(${moveX}px, ${moveY}px, 0)`;
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // Toggle Photo Logic
+        function togglePhoto(element) {
+            const e = window.event;
+            if (e) e.stopPropagation();
+
+            const grid = document.getElementById('gridContainer');
+
+            if (!element.classList.contains('open')) {
+                closeAllPhotos();
+                element.classList.add('open');
+                if (grid) grid.style.zIndex = '9999'; // Lift grid container above stickers
+            } else {
+                element.classList.remove('open');
+                if (grid) grid.style.zIndex = '4'; // Reset depth back to normal
+            }
+        }
+
+        function closeAllPhotos() {
+            document.querySelectorAll('.polaroid-slot').forEach(photo => {
+                photo.classList.remove('open');
+            });
+            const grid = document.getElementById('gridContainer');
+            if (grid) grid.style.zIndex = '4';
+        }
+
+        // Close photo when clicking outside on the background stage
+        document.addEventListener('click', closeAllPhotos);
+
+        // Navigation with Fade Transition
+        function navigateToPage(url) {
+            const overlay = document.getElementById('pageOverlay');
+            if (overlay) {
+                overlay.style.pointerEvents = 'auto';
+                overlay.style.opacity = '1';
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 400);
+            } else {
+                window.location.href = url;
+            }
+        }
+    </script>
+
+</body>
+</html>
+

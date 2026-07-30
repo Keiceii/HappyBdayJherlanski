@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Alex+Brush&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #38141f; 
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- FIXED STAGE CANVAS CONTAINER --- */
+        .page-stage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1920px;  
+            height: 1080px; 
+            transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+            transform-origin: center center;
+            overflow: hidden;
+            z-index: 3; 
+        }
+
+        /* --- TRANSITION OVERLAY --- */
+        .page-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #38141f; 
+            z-index: 9999;             
+            pointer-events: auto;
+            opacity: 1; 
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .page-loaded .page-transition-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- PARALLAX BACKGROUND LAYER ENGINE --- */
+        .background-container {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 120vw; 
+            height: 120vh;
+            z-index: 1;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); 
+        }
+
+        .bg-flower {
+            position: absolute;
+            height: auto;
+            pointer-events: none;
+            filter: drop-shadow(0px 10px 20px rgba(0, 0, 0, 0.15));
+        }
+
+        .flower-left { width: 2100px; left: -25%; top: 35%; z-index: 1; }
+        .flower-center { width: 2150px; left: 50%; top: -15%; transform: translateX(-50%); z-index: 2; }
+        .flower-right { width: 2000px; right: -25%; bottom: -20%; z-index: 1; }
+
+        /* --- RED TRANSLUCENT OVERLAY --- */
+        .tint-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(56, 20, 31, 0.725); 
+            z-index: 2; 
+            pointer-events: none; 
+        }
+
+        /* --- STAGGERED ENTRANCE ANIMATIONS --- */
+        .scrap-bg,
+        .calendar-card,
+        .hanging-lights,
+        .photo-wrapper,
+        .flower-cutout,
+        .quote-tag,
+        .star-stickers,
+        .wax-seal {
+            opacity: 0;
+        }
+
+        @keyframes popInElement {
+            0% {
+                opacity: 0;
+                transform: scale(0.85) translateY(20px);
+            }
+            70% {
+                opacity: 1;
+                transform: scale(1.02) translateY(-4px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .page-loaded .scrap-bg        { animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s forwards; }
+        .page-loaded .hanging-lights  { animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.35s forwards; }
+        .page-loaded .calendar-card   { animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.5s forwards; }
+        .page-loaded .photo-left-wrap { animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.65s forwards; }
+        .page-loaded .photo-right-wrap{ animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.8s forwards; }
+        .page-loaded .quote-tag       { animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.95s forwards; }
+        .page-loaded .star-stickers   { animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.1s forwards; }
+        .page-loaded .flower-cutout   { animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.25s forwards; }
+        .page-loaded .wax-seal        { animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.4s forwards; }
+
+        /* Lock opacity to 1 once entrance animations complete */
+        .transitions-active .scrap-bg,
+        .transitions-active .calendar-card,
+        .transitions-active .hanging-lights,
+        .transitions-active .photo-wrapper,
+        .transitions-active .flower-cutout,
+        .transitions-active .quote-tag,
+        .transitions-active .star-stickers,
+        .transitions-active .wax-seal {
+            opacity: 1 !important;
+            animation: none;
+        }
+
+        /* --- COLLAGE CANVAS & SCRAP ELEMENTS --- */
+        .collage-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+        }
+
+        .scrap {
+            position: absolute;
+            height: auto;
+            pointer-events: none;
+            filter: drop-shadow(4px 10px 15px rgba(0, 0, 0, 0.3));
+        }
+
+        /* 1. Newspaper Border Frames (33.png) */
+        .scrap-bg {
+            position: absolute;
+            width: 1920px;
+            height: 1080px;
+            top: 0;
+            left: 0;
+            object-fit: cover;
+            z-index: 2;
+        }
+
+        /* 2. Hanging String Lights (34.png) */
+        .hanging-lights {
+            width: 1800px;
+            top: -220px;
+            left: -630px;
+            z-index: 5;
+        }
+
+        /* 3. August Calendar (35.png) */
+        .calendar-card {
+            width: 1800px;
+            top: 50px;
+            left: 120px;
+            z-index: 3;
+        }
+
+        /* 4. Photo Wrappers */
+        .photo-wrapper {
+            position: absolute;
+            z-index: 4;
+            cursor: pointer;
+            will-change: transform, z-index;
+        }
+
+        /* Smooth CSS transitions for click-to-expand */
+        .transitions-active .photo-wrapper {
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .photo-wrapper .scrap {
+            position: relative;
+            pointer-events: none;
+            transition: filter 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Hover Lift */
+        .photo-wrapper:not(.open):hover .scrap {
+            transform: scale(1.03) translateY(-6px);
+            filter: drop-shadow(0px 15px 25px rgba(0, 0, 0, 0.45));
+        }
+
+        /* BASE POSITIONS & INITIAL ROTATIONS */
+        .photo-left-wrap {
+            top: 280px;
+            left: -630px;
+            --base-rot: -3deg;
+        }
+        .photo-left-wrap .scrap { width: 1980px; }
+
+        .photo-right-wrap {
+            top: -250px;
+            right: -500px;
+            --base-rot: 4deg;
+        }
+        .photo-right-wrap .scrap { width: 1700px; }
+
+        /* Default resting transform */
+        .photo-left-wrap,
+        .photo-right-wrap {
+            transform: rotate(var(--base-rot)) translate(0, 0) scale(1);
+        }
+
+        /* OPEN POP-OUT STATE POSITIONS */
+        .photo-left-wrap.open {
+            --target-x: 590px;
+            --target-y: -300px;
+            --target-scale: 1.5;
+            transform: rotate(0deg) translate(var(--target-x), var(--target-y)) scale(var(--target-scale)) !important;
+            z-index: 30 !important;
+            opacity: 1 !important;
+        }
+
+        .photo-right-wrap.open {
+            --target-x: -600px;
+            --target-y: 300px;
+            --target-scale: 1.5;
+            transform: rotate(0deg) translate(var(--target-x), var(--target-y)) scale(var(--target-scale)) !important;
+            z-index: 30 !important;
+            opacity: 1 !important;
+        }
+
+        /* Drop z-index back down smoothly when closing */
+        .photo-wrapper:not(.open) {
+            z-index: 4;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), z-index 0s 0.6s;
+        }
+
+        /* 5. Decorative Stickers & Details */
+        .flower-cutout {
+            width: 1900px;
+            bottom: -450px;
+            left: -350px;
+            z-index: 6;
+            transform: rotate(-10deg);
+        }
+
+        .quote-tag {
+            width: 1900px;
+            top: -150px;
+            right: -420px;
+            z-index: 6;
+            transform: rotate(-5deg);
+        }
+
+        .star-stickers {
+            width: 2000px;
+            top: -400px;
+            right: -850px;
+            z-index: 6;
+        }
+
+        .wax-seal {
+            width: 2000px;
+            bottom: -350px;
+            right: -800px;
+            z-index: 6;
+        }
+
+        /* --- NAVIGATION BUTTON --- */
+        .button-container {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            z-index: 10;
+        }
+
+        .click-btn {
+            background-color: #f5f5f5;
+            color: #7a2e2e;
+            border: none;
+            border-radius: 60px;
+            padding: 18px 45px;
+            font-size: 28px;
+            cursor: pointer;
+            font-family: serif;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            transition: transform 0.3s ease-out;
+        }
+
+        .click-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- OVERLAY OUTSIDE STAGE TO COVER FULL SCREEN ON LOAD -->
+    <div class="page-transition-overlay" id="pageOverlay"></div>
+
+    <!-- PARALLAX BACKGROUND -->
+    <div class="background-container" id="parallaxBg">
+        <img src="18.png" class="bg-flower flower-left" alt="Left Flower Base">
+        <img src="19.png" class="bg-flower flower-center" alt="Center Layer Flower">
+        <img src="20.png" class="bg-flower flower-right" alt="Right Flower Base">
+    </div>
+    
+    <div class="tint-overlay"></div>
+
+    <!-- RESPONSIVE CANVAS STAGE WRAPPER -->
+    <div class="page-stage">
+
+        <div class="collage-container">
+
+            <!-- Torn Newspaper Frame Background -->
+            <img src="33.png" class="scrap-bg" alt="Newspaper Border">
+
+            <!-- Hanging Lights -->
+            <img src="34.png" class="scrap hanging-lights" alt="Hanging Lights">
+
+            <!-- Center August Calendar -->
+            <img src="35.png" class="scrap calendar-card" alt="August Calendar">
+
+            <!-- Bottom Left Photo -->
+            <div class="photo-wrapper photo-left-wrap" onclick="togglePhoto(this)">
+                <img src="37.png" class="scrap" alt="Memories Group Photo">
+            </div>
+
+            <!-- Top Right Photo -->
+            <div class="photo-wrapper photo-right-wrap" onclick="togglePhoto(this)">
+                <img src="39.png" class="scrap" alt="Birthday Candle Photo">
+            </div>
+
+            <!-- Red Flower Accent -->
+            <img src="36.png" class="scrap flower-cutout" alt="Red Flower Accent">
+
+            <!-- Heart Quote Tag -->
+            <img src="38.png" class="scrap quote-tag" alt="Darling You Are All I Ever Wanted">
+
+            <!-- Red Star Stickers -->
+            <img src="41.png" class="scrap star-stickers" alt="Red Star Stickers">
+
+            <!-- Wax Seal Accent -->
+            <img src="40.png" class="scrap wax-seal" alt="Rose Wax Seal">
+
+        </div>
+    </div>
+
+    <!-- BACK BUTTON -->
+    <div class="button-container">
+        <button class="click-btn" onclick="navigateToPage('choices.html')">BACK</button>
+    </div>
+
+    <script>
+        // Auto-Scale Canvas Function
+        function updateStageScale() {
+            const stage = document.querySelector('.page-stage');
+            if (stage) {
+                const scaleX = window.innerWidth / 1920;
+                const scaleY = window.innerHeight / 1080;
+                const scale = Math.max(scaleX, scaleY); 
+                stage.style.setProperty('--stage-scale', scale);
+            }
+        }
+
+        window.addEventListener('resize', updateStageScale);
+        updateStageScale();
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateStageScale();
+            
+            // 1. Trigger page entrance animation
+            setTimeout(() => {
+                document.body.classList.add('page-loaded');
+            }, 100);
+
+            // 2. Enable click interactions & lock visibility once entrance finishes
+            setTimeout(() => {
+                document.body.classList.add('transitions-active');
+            }, 2000);
+        });
+
+        // Parallax Mouse Motion
+        const background = document.getElementById('parallaxBg');
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+
+            const moveX = (mouseX - 0.5) * -35;
+            const moveY = (mouseY - 0.5) * -35;
+
+            background.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
+
+        // Toggle Logic
+        function togglePhoto(element) {
+            if (!element.classList.contains('open')) {
+                closeAllPhotos();
+                element.classList.add('open');
+            } else {
+                element.classList.remove('open');
+            }
+        }
+
+        function closeAllPhotos() {
+            document.querySelectorAll('.photo-wrapper').forEach(photo => {
+                photo.classList.remove('open');
+            });
+        }
+
+        // Navigation with Fade Transition
+        function navigateToPage(url) {
+            const overlay = document.getElementById('pageOverlay');
+            if (overlay) {
+                overlay.style.pointerEvents = 'auto';
+                overlay.style.opacity = '1';
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 400);
+            } else {
+                window.location.href = url;
+            }
+        }
+    </script>
+
+</body>
+</html>

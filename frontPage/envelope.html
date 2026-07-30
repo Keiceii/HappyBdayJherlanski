@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Alex+Brush&display=swap" rel="stylesheet">
+    <style>
+    body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #38141f; 
+        overflow: hidden;
+        position: relative;
+    }
+
+    /* --- FIXED STAGE CANVAS CONTAINER --- */
+    .page-stage {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 1920px;  
+        height: 1080px; 
+        
+        transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+        transform-origin: center center;
+        overflow: hidden;
+
+        background-image: url('15.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    /* --- TRANSITION OVERLAY --- */
+    .page-transition-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: #38141f; 
+        z-index: 9999;             
+        pointer-events: auto;
+        opacity: 1; 
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .page-loaded .page-transition-overlay {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    /* --- ANIMATION ENGINES --- */
+    
+    /* 1. Base hidden states for elements */
+    h1, 
+    .cake, 
+    .envelope-container, 
+    .click-hint span {
+        opacity: 0;
+    }
+
+    /* 2. Handwriting Draw-On Reveal Animation (Left to Right Clip Path) */
+    @keyframes writeText {
+        0% {
+            opacity: 0;
+            clip-path: inset(0 100% 0 0);
+        }
+        10% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 1;
+            clip-path: inset(0 0 0 0);
+        }
+    }
+
+    /* 3. Pop-In Animation for non-text graphics */
+    @keyframes popInCake {
+        0% { opacity: 0; transform: scale(1.4) translateY(20px); }
+        70% { opacity: 1; transform: scale(1.63) translateY(-3px); }
+        100% { opacity: 1; transform: scale(1.6) translateY(0); }
+    }
+
+    @keyframes popInEnvelope {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+        70% { opacity: 1; transform: translate(-50%, -50%) scale(1.03); }
+        100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    /* 4. Trigger Sequence on Page Load */
+    .page-loaded h1 {
+        animation: writeText 2s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+    }
+
+    .page-loaded .cake {
+        animation: popInCake 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.2s forwards;
+    }
+
+    .page-loaded .envelope-container {
+        animation: popInEnvelope 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.5s forwards;
+    }
+
+    .page-loaded .click-hint span {
+        animation: writeText 1.5s cubic-bezier(0.4, 0, 0.2, 1) 2s forwards;
+    }
+
+    /* Headline */
+    h1 {
+        font-family: 'Parisienne', cursive;
+        color: #000000;
+        font-size: 3.8rem;
+        font-weight: normal;
+        text-align: center;
+        line-height: 1.4;
+        position: absolute;
+        top: 8%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 85%;
+        margin: 0;
+        transition: opacity 0.5s ease;
+        display: inline-block;
+        will-change: clip-path, opacity;
+    }
+
+    /* 1. Cake Sketch */
+    .cake {
+        position: absolute;
+        left: -15%;       
+        top: 33%;       
+        width: 1000px;   
+        height: auto;
+        transform: scale(1.6); 
+        transform-origin: left center; 
+        transition: opacity 0.5s ease;
+    }
+
+    /* 2. Interactive Envelope & Letter Wrapper */
+    .envelope-container {
+        position: absolute;
+        left: 50%;
+        top: 55%;
+        transform: translate(-50%, -50%);
+        width: 600px; 
+        height: 500px; 
+        cursor: pointer;
+        position: relative;
+    }
+
+    .envelope-back {
+        position: absolute;
+        z-index: 1;
+        width: 1500px;       
+        height: auto;
+        left: 50%;          
+        top: 45%;           
+        transform: translate(-50%, -50%);
+        transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease;
+    }
+
+    .envelope-front {
+        position: absolute;
+        z-index: 3;
+        width: 1500px;       
+        height: auto;
+        left: 50%;          
+        top: 62%;         
+        transform: translate(-50%, -50%);
+        transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease;
+    }
+
+    .envelope-container:not(.open):not(.closing):hover .envelope-back,
+    .envelope-container:not(.open):not(.closing):hover .envelope-front {
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    .letter {
+        position: absolute;
+        z-index: 2; 
+        opacity: 1; 
+        width: 600px; 
+        height: auto;
+        left: 48.5%;
+        top: 39%;
+        transform: translate(-50%, -58%) scale(1.5); 
+        will-change: transform, opacity, filter;
+    }
+
+    .floral-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 8; 
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(1.1);
+        will-change: transform, opacity;
+    }
+
+    /* Letter Open/Close Animations */
+    .envelope-container.open .letter {
+        animation: popOutAndRead 2.2s forwards cubic-bezier(0.25, 1, 0.5, 1);
+        pointer-events: auto;
+    }
+
+    .envelope-container.closing .letter {
+        animation: putBackInEnvelope 1.8s forwards cubic-bezier(0.25, 1, 0.5, 1);
+        pointer-events: none;
+    }
+
+    .open-card-active .floral-overlay {
+        animation: floralBounceIn 2.2s forwards cubic-bezier(0.175, 0.885, 0.32, 1);
+    }
+
+    .closing-card-active .floral-overlay {
+        animation: floralFadeOut 1.5s forwards ease-in-out;
+    }
+
+    .open-card-active h1,
+    .open-card-active .cake,
+    .open-card-active .click-hint {
+        opacity: 0 !important;
+        pointer-events: none;
+    }
+    
+    h1, .cake, .click-hint {
+        transition: opacity 0.6s ease 0.4s;
+    }
+
+    .envelope-container.open .envelope-back,
+    .envelope-container.open .envelope-front {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.6);
+        pointer-events: none;
+        transition: transform 0.8s ease, opacity 0.8s ease;
+        transition-delay: 0.3s;
+    }
+    
+    .envelope-container.closing .envelope-back,
+    .envelope-container.closing .envelope-front {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        transition: transform 0.8s ease, opacity 0.8s ease;
+        transition-delay: 0.4s;
+    }
+
+    @keyframes popOutAndRead {
+        0% { opacity: 1; transform: translate(-50%, -58%) scale(1.5); z-index: 2; }
+        35% { opacity: 1; transform: translate(-50%, -150%) scale(1.5); z-index: 2; }
+        45% { z-index: 10; }
+        100% { z-index: 10; opacity: 1; transform: translate(-50%, -50%) scale(3.2); filter: drop-shadow(0px 15px 30px rgba(0, 0, 0, 0.3)); }
+    }
+
+    @keyframes putBackInEnvelope {
+        0% { z-index: 10; opacity: 1; transform: translate(-50%, -50%) scale(3.2); }
+        45% { z-index: 10; opacity: 1; transform: translate(-50%, -150%) scale(1.5); }
+        60% { z-index: 2; }
+        100% { opacity: 1; transform: translate(-50%, -58%) scale(1.5); z-index: 2; }
+    }
+
+    @keyframes floralBounceIn { 0% { opacity: 0; transform: scale(1.15); } 100% { opacity: 1; transform: scale(1); } }
+    @keyframes floralFadeOut { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.08); } }
+
+    /* --- FIXED CLICK HINT WRAPPER & SPAN --- */
+    .click-hint {
+        position: absolute;
+        right: 12%;
+        top: 56%;
+        width: 500px; /* Gives plenty of width so text never clips */
+        text-align: left;
+    }
+
+    .click-hint span {
+        font-family: 'Alex Brush', cursive;
+        font-size: 3.2rem;
+        color: #333333;
+        display: inline-block;
+        white-space: nowrap;
+        padding-right: 20px; /* Extra padding so the exclamation mark has clearance */
+        will-change: clip-path, opacity;
+    }
+
+    .button-container {
+        position: fixed; 
+        bottom: 30px;
+        right: 30px;
+        display: flex;
+        gap: 15px;
+        z-index: 999; 
+    }
+
+    .click-btn {
+        background-color: #f5f5f5;
+        color: #7a2e2e;
+        border: none;
+        border-radius: 50px;
+        padding: 18px 45px;
+        font-size: 30px;
+        cursor: pointer;
+        font-family: serif;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+
+    .click-btn:hover { transform: scale(1.05); }
+</style>
+</head>
+<body>
+
+    <!-- OVERLAY OUTSIDE STAGE TO COVER FULL SCREEN ON LOAD -->
+    <div class="page-transition-overlay" id="pageOverlay"></div>
+
+    <!-- STAGE WRAPPER -->
+    <div class="page-stage">
+        <h1>
+            Happy Birthday my love!<br>
+            a small little something, I hope you like it!
+        </h1>
+
+        <img src="14.png" class="cake" alt="Cake">
+
+        <div class="envelope-container" id="envelopeContainer" onclick="toggleLetter()">
+            <img src="13.png" class="envelope-back" alt="Envelope Back">
+            <img src="17.png" class="letter" alt="Your Letter">
+            <img src="12.png" class="envelope-front" alt="Envelope Front">
+        </div>
+
+        <img src="16.png" class="floral-overlay" alt="Floral Border Layover">
+
+        <div class="click-hint">
+            <span>Click the envelope!</span>
+        </div>
+    </div>
+
+    <!-- BUTTONS OUTSIDE STAGE TO PREVENT CROPPING -->
+    <div class="button-container">
+        <button class="click-btn" onclick="navigateToPage('index.html')">BACK</button>
+        <button class="click-btn" onclick="navigateToPage('choices.html')">NEXT</button>
+    </div>
+
+    <script>
+    function updateStageScale() {
+        const stage = document.querySelector('.page-stage');
+        if (stage) {
+            const scaleX = window.innerWidth / 1920;
+            const scaleY = window.innerHeight / 1080;
+            const scale = Math.max(scaleX, scaleY); 
+            stage.style.setProperty('--stage-scale', scale);
+        }
+    }
+
+    window.addEventListener('resize', updateStageScale);
+    updateStageScale();
+
+    window.addEventListener('DOMContentLoaded', () => {
+        updateStageScale();
+        setTimeout(() => {
+            document.body.classList.add('page-loaded');
+        }, 100);
+    });
+
+    function navigateToPage(url) {
+        const overlay = document.getElementById('pageOverlay');
+        if (overlay) {
+            overlay.style.pointerEvents = 'auto';
+            overlay.style.opacity = '1';
+            setTimeout(() => {
+                window.location.href = url;
+            }, 400);
+        } else {
+            window.location.href = url;
+        }
+    }
+
+    function toggleLetter() {
+        const container = document.getElementById('envelopeContainer');
+        if (!container.classList.contains('open')) {
+            container.classList.remove('closing');
+            document.body.classList.remove('closing-card-active');
+            container.classList.add('open');
+            document.body.classList.add('open-card-active');
+        } else {
+            container.classList.remove('open');
+            document.body.classList.remove('open-card-active');
+            container.classList.add('closing');
+            document.body.classList.add('closing-card-active');
+        }
+    }
+</script>
+</body>
+</html>

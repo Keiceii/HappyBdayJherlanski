@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        /* Container that locks the exact design ratio (16:9 widescreen) */
+.page-stage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1920px;  /* Base canvas width */
+    height: 1080px; /* Base canvas height */
+    transform: translate(-50%, -50%) scale(calc(min(100vw / 1920, 100vh / 1080)));
+    transform-origin: center center;
+    overflow: hidden;
+}
+        body {
+            margin: 0;
+            height: 100vh;
+            background-image: url('8.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- THE PERFECTED ENGINE CONTROLS --- */
+        .page-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #38141f; 
+            z-index: 9999;             
+            pointer-events: auto; /* Block clicks while transitioning */
+            opacity: 1; /* CRITICAL: Starts completely solid by default */
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        /* Only unblocks the screen and fades away once JavaScript gives the green light */
+        .page-loaded .page-transition-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        img {
+            max-width: 90%;
+            height: auto;
+        }
+
+        .click-btn {
+            background-color: #f5f5f5;
+            color: #7a2e2e;
+            border: none;
+            border-radius: 50px;
+            padding: 20px 40px;
+            font-size: 32px;
+            cursor: pointer;
+            font-family: serif;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            position: absolute;
+            bottom: 20%; 
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10; 
+            transition: transform 0.3s ease;
+        }
+
+        .click-btn:hover {
+            transform: translateX(-50%) scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-transition-overlay" id="pageOverlay"></div>
+
+    <img src="9.png" alt="Birthday Cake">
+    
+    <button class="click-btn" onclick="navigateToPage('envelope.html')">
+        CLICK ME!
+    </button>
+
+    <script>
+        // Fades the entry curtain out cleanly on load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.body.classList.add('page-loaded');
+            }, 50); 
+        });
+
+        function navigateToPage(url) {
+            const overlay = document.getElementById('pageOverlay');
+            if (overlay) {
+                overlay.style.pointerEvents = 'auto';
+                overlay.style.opacity = '1'; // Drops curtain down smoothly
+                
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 400); // Swaps pages right as it hits full opacity
+            } else {
+                window.location.href = url;
+            }
+        }
+    </script>
+</body>
+</html>

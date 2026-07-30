@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Alex+Brush&display=swap" rel="stylesheet">
+    <style>
+        /* Container that locks the exact design ratio (16:9 widescreen) */
+.page-stage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 1920px;  /* Base canvas width */
+    height: 1080px; /* Base canvas height */
+    transform: translate(-50%, -50%) scale(calc(min(100vw / 1920, 100vh / 1080)));
+    transform-origin: center center;
+    overflow: hidden;
+}
+        /* Base Setup */
+        html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; /* Stops Chrome from adding scrollbars that shrink the canvas */
+    box-sizing: border-box;
+}
+
+        /* --- THE PERFECTED ENGINE CONTROLS --- */
+        .page-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #38141f; 
+            z-index: 9999;             
+            pointer-events: auto;
+            opacity: 1; /* Starts completely solid by default */
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .page-loaded .page-transition-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- THE PARALLAX BACKGROUND LAYER ENGINE --- */
+        .background-container {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 120vw; 
+            height: 120vh;
+            z-index: 1;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); 
+        }
+
+        .bg-flower {
+            position: absolute;
+            height: auto;
+            pointer-events: none;
+            filter: drop-shadow(0px 10px 20px rgba(0, 0, 0, 0.15));
+        }
+
+        .flower-left { width: 2100px; left: -25%; top: 35%; z-index: 1; }
+        .flower-center { width: 2150px; left: 50%; top: -15%; transform: translateX(-50%); z-index: 2; }
+        .flower-right { width: 2000px; right: -25%; bottom: -20%; z-index: 1; }
+
+        /* --- THE RED TRANSLUCENT OVERLAY --- */
+        .tint-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(56, 20, 31, 0.725); 
+            z-index: 2; 
+            pointer-events: none; 
+        }
+
+        /* --- THE FOREGROUND USER INTERFACE --- */
+        .ui-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            z-index: 3; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            padding: 60px 40px;
+        }
+
+        .choices-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: -20px;           
+            width: 85%;          
+            max-width: 1700px;    
+            margin: auto; 
+            align-items: center;
+            justify-items: center;
+        }
+
+        .choice-card {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            width: 280px; 
+            height: 400px; 
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            will-change: transform;
+        }
+
+        .choice-img {
+            width: 400%;
+            max-width: 2000px; 
+            height: auto;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none; 
+            filter: drop-shadow(0px 8px 15px rgba(0,0,0,0.25));
+            transition: filter 0.4s ease;
+        }
+
+        .choice-card:hover { transform: translateY(-15px) scale(1.06); }
+        .choice-card:hover .choice-img { filter: drop-shadow(0px 15px 25px rgba(0,0,0,0.35)); }
+
+        .cta-text {
+            font-family: 'Alex Brush', cursive;
+            color: #ffffff;
+            font-size: 4rem;
+            text-align: center;
+            margin: 0;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            width: 100%;
+            position: absolute;
+            bottom: 18%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .button-container {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            z-index: 10;
+        }
+
+        .click-btn {
+            background-color: #f5f5f5;
+            color: #7a2e2e;
+            border: none;
+            border-radius: 60px;
+            padding: 18px 45px;
+            font-size: 28px;
+            cursor: pointer;
+            font-family: serif;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            transition: transform 0.3s x ease-out;
+        }
+
+        .click-btn:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+    <div class="page-transition-overlay" id="pageOverlay"></div>
+
+    <div class="background-container" id="parallaxBg">
+        <img src="18.png" class="bg-flower flower-left" alt="Left Flower Base">
+        <img src="19.png" class="bg-flower flower-center" alt="Center Layer Flower">
+        <img src="20.png" class="bg-flower flower-right" alt="Right Flower Base">
+    </div>
+    
+    <div class="tint-overlay"></div>
+
+    <div class="ui-wrapper">
+        <div class="choices-container">
+            <div class="choice-card" onclick="selectChoice('mouse')">
+                <img src="21.png" class="choice-img" alt="Mouse Character Choice">
+            </div>
+            <div class="choice-card" onclick="selectChoice('party-cat')">
+                <img src="22.png" class="choice-img" alt="Center Cat Choice">
+            </div>
+            <div class="choice-card" onclick="selectChoice('ribbon-cat')">
+                <img src="23.png" class="choice-img" alt="Right Cat Choice">
+            </div>
+        </div>
+
+        <h2 class="cta-text">Click on each one!</h2>
+
+        <div class="button-container">
+            <button class="click-btn" onclick="navigateToPage('envelope.html')">BACK</button>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.body.classList.add('page-loaded');
+            }, 50);
+        });
+
+        function navigateToPage(url) {
+            const overlay = document.getElementById('pageOverlay');
+            if (overlay) {
+                overlay.style.pointerEvents = 'auto';
+                overlay.style.opacity = '1';
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 400);
+            } else {
+                window.location.href = url;
+            }
+        }
+
+        const background = document.getElementById('parallaxBg');
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+            const moveX = (mouseX - 0.5) * -35;
+            const moveY = (mouseY - 0.5) * -35;
+            background.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
+
+        function selectChoice(choiceId) {
+            if (choiceId === 'mouse') { navigateToPage('memories.html'); } 
+            else if (choiceId === 'party-cat') { navigateToPage('kclalan.html'); } 
+            else if (choiceId === 'ribbon-cat') { navigateToPage('calendar.html'); }
+        }
+    </script>
+</body>
+</html>

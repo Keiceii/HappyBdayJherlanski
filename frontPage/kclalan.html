@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Alex+Brush&display=swap" rel="stylesheet">
+    <style>
+        /* Container that locks the exact design ratio (16:9 widescreen) */
+        .page-stage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1920px;  
+            height: 1080px; 
+            transform: translate(-50%, -50%) scale(calc(min(100vw / 1920, 100vh / 1080)));
+            transform-origin: center center;
+            overflow: hidden;
+        }
+
+        /* Base Setup */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; 
+            box-sizing: border-box;
+        }
+
+        /* --- TRANSITION ENGINE --- */
+        .page-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #38141f; 
+            z-index: 9999;             
+            pointer-events: auto;
+            opacity: 1; 
+            transition: opacity 0.4s ease-in-out;
+        }
+
+        .page-loaded .page-transition-overlay {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- PARALLAX BACKGROUND LAYER ENGINE --- */
+        .background-container {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 120vw; 
+            height: 120vh;
+            z-index: 1;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); 
+        }
+
+        .bg-flower {
+            position: absolute;
+            height: auto;
+            pointer-events: none;
+            filter: drop-shadow(0px 10px 20px rgba(0, 0, 0, 0.15));
+        }
+
+        .flower-left { width: 2100px; left: -25%; top: 35%; z-index: 1; }
+        .flower-center { width: 2150px; left: 50%; top: -15%; transform: translateX(-50%); z-index: 2; }
+        .flower-right { width: 2000px; right: -25%; bottom: -20%; z-index: 1; }
+
+        /* --- RED TRANSLUCENT OVERLAY --- */
+        .tint-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(56, 20, 31, 0.725); 
+            z-index: 2; 
+            pointer-events: none; 
+        }
+
+        /* --- FOREGROUND WRAPPER --- */
+        .ui-wrapper {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            z-index: 3; 
+            box-sizing: border-box;
+        }
+
+        /* --- COLLAGE CANVAS BOX --- */
+        .collage-container {
+            position: absolute;
+            top: 46%;
+            left: 48%;
+            transform: translate(-50%, -50%);
+            width: 1000px;
+            height: 700px;
+        }
+
+        .scrap {
+            position: absolute;
+            height: auto;
+            filter: drop-shadow(3px 8px 12px rgba(0, 0, 0, 0.35));
+        }
+
+        /* --- INTERACTIVE PHOTO WRAPPERS (Precise Hover Boxes) --- */
+        .photo-wrapper {
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.3s ease, z-index 0s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Giant image inside wrapper stays uncropped and centered */
+        .photo-wrapper .scrap {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none; 
+        }
+
+        /* HOVER ACTION FOR PHOTO WRAPPERS */
+        .photo-wrapper:hover {
+            transform: scale(1.08) translateY(-10px) !important;
+            z-index: 20 !important; 
+        }
+
+        .photo-wrapper:hover .scrap {
+            filter: drop-shadow(0px 15px 25px rgba(0, 0, 0, 0.5));
+        }
+
+        /* --- POP-IN ANIMATION ENGINE --- */
+        
+        /* 1. Base hidden state for all animated elements */
+        .camera,
+        .photo-wrapper,
+        .favorite-sign,
+        .ribbon-bow,
+        .drawn-star,
+        .sparkles,
+        .curly-ribbon {
+            opacity: 0;
+        }
+
+        /* 2. Keyframes for the gentle spring pop effect */
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.6) translateY(20px);
+            }
+            70% {
+                opacity: 1;
+                transform: scale(1.05) translateY(-5px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* 3. Trigger animation when page curtain finishes lifting */
+        .page-loaded .camera,
+        .page-loaded .photo-wrapper,
+        .page-loaded .favorite-sign,
+        .page-loaded .ribbon-bow,
+        .page-loaded .drawn-star,
+        .page-loaded .sparkles,
+        .page-loaded .curly-ribbon {
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 4. Staggered timing order for each item */
+        .page-loaded .camera               { animation-delay: 0.2s; }
+        .page-loaded .wrapper-top-left     { animation-delay: 0.35s; }
+        .page-loaded .wrapper-bottom-left  { animation-delay: 0.5s; }
+        .page-loaded .wrapper-photo-strip  { animation-delay: 0.65s; }
+        .page-loaded .favorite-sign        { animation-delay: 0.8s; }
+        .page-loaded .drawn-star           { animation-delay: 0.95s; }
+        .page-loaded .sparkles             { animation-delay: 1.1s; }
+        .page-loaded .curly-ribbon         { animation-delay: 1.25s; }
+        .page-loaded .ribbon-bow           { animation-delay: 1.4s; }
+
+        /* --- SIZING & POSITIONS --- */
+        
+        /* 1. Retro Camera (27.png) */
+        .camera {
+            width: 1800px;
+            top: -400px;
+            left: -780px;
+            z-index: 2;
+        }
+
+        /* 2. Top Polaroid Box (24.png) */
+        .wrapper-top-left {
+            width: 280px;
+            height: 430px;
+            top: -60px;
+            left: 210px;
+            z-index: 3;
+        }
+        .polaroid-top-left {
+            width: 1750px;
+        }
+
+        /* 3. Bottom Polaroid Box (25.png) */
+        .wrapper-bottom-left {
+            width: 300px;
+            height: 410px;
+            top: 380px;
+            left: 220px;
+            z-index: 4;
+        }
+        .polaroid-bottom-left {
+            width: 1750px;
+        }
+
+        /* 4. Vertical Photo Strip Box (26.png) */
+        .wrapper-photo-strip {
+            width: 200px;
+            height: 570px;
+            top: 80px;
+            left: 600px;
+            z-index: 3;
+        }
+        .photo-strip {
+            width: 1750px;
+        }
+
+        /* 5. Decorative Overlays */
+        .favorite-sign {
+            width: 1600px;
+            top: -90px;
+            left: -550px;
+            z-index: 6;
+            pointer-events: none; 
+        }
+
+        .ribbon-bow {
+            width: 1600px;
+            top: 250px;
+            left: -650px;
+            z-index: 6;
+            pointer-events: none; 
+        }
+
+        .drawn-star {
+            width: 1500px;
+            top: -50px;
+            left: -210px;
+            z-index: 6;
+            pointer-events: none; 
+        }
+
+        .sparkles {
+            width: 1600px;
+            top: 50px;
+            left: 60px;
+            z-index: 6;
+            pointer-events: none; 
+        }
+
+        .curly-ribbon {
+            width: 1600px;
+            top: -280px;
+            left: 50px;
+            z-index: 6;
+            pointer-events: none; 
+        }
+
+        /* --- NAVIGATION BUTTON --- */
+        .button-container {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            z-index: 10;
+        }
+
+        .click-btn {
+            background-color: #f5f5f5;
+            color: #7a2e2e;
+            border: none;
+            border-radius: 60px;
+            padding: 18px 45px;
+            font-size: 28px;
+            cursor: pointer;
+            font-family: serif;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+            transition: transform 0.3s ease-out;
+        }
+
+        .click-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-transition-overlay" id="pageOverlay"></div>
+
+    <div class="background-container" id="parallaxBg">
+        <img src="18.png" class="bg-flower flower-left" alt="Left Flower Base">
+        <img src="19.png" class="bg-flower flower-center" alt="Center Layer Flower">
+        <img src="20.png" class="bg-flower flower-right" alt="Right Flower Base">
+    </div>
+    
+    <div class="tint-overlay"></div>
+
+    <div class="ui-wrapper">
+
+        <!-- COLLAGE LAYOUT CONTAINER -->
+        <div class="collage-container">
+            <img src="27.png" class="scrap camera" alt="Retro Camera">
+            
+            <!-- PHOTO 1 WRAPPER -->
+            <div class="photo-wrapper wrapper-top-left">
+                <img src="24.png" class="scrap polaroid-top-left" alt="Polaroid with Pin">
+            </div>
+
+            <!-- PHOTO 2 WRAPPER -->
+            <div class="photo-wrapper wrapper-bottom-left">
+                <img src="25.png" class="scrap polaroid-bottom-left" alt="Polaroid Bottom Left">
+            </div>
+
+            <!-- PHOTO 3 STRIP WRAPPER -->
+            <div class="photo-wrapper wrapper-photo-strip">
+                <img src="26.png" class="scrap photo-strip" alt="Photo Strip Right">
+            </div>
+
+            <img src="29.png" class="scrap favorite-sign" alt="Favorite Person Sign">
+            <img src="30.png" class="scrap ribbon-bow" alt="Black Ribbon">
+            <img src="28.png" class="scrap drawn-star" alt="Drawn Star">
+            <img src="31.png" class="scrap sparkles" alt="Sparkles Cutout">
+            <img src="32.png" class="scrap curly-ribbon" alt="Curly Heart Ribbon">
+        </div>
+
+        <div class="button-container">
+            <button class="click-btn" onclick="navigateToPage('choices.html')">BACK</button>
+        </div>
+
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.body.classList.add('page-loaded');
+            }, 50);
+        });
+
+        function navigateToPage(url) {
+            const overlay = document.getElementById('pageOverlay');
+            if (overlay) {
+                overlay.style.pointerEvents = 'auto';
+                overlay.style.opacity = '1';
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 400);
+            } else {
+                window.location.href = url;
+            }
+        }
+
+        const background = document.getElementById('parallaxBg');
+        document.addEventListener('mousemove', (e) => {
+            const mouseX = e.clientX / window.innerWidth;
+            const mouseY = e.clientY / window.innerHeight;
+
+            const moveX = (mouseX - 0.5) * -35;
+            const moveY = (mouseY - 0.5) * -35;
+
+            background.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
+    </script>
+
+</body>
+</html>

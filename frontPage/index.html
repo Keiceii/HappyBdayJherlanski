@@ -11,9 +11,13 @@
             overflow: hidden;
             box-sizing: border-box;
             background-color: #38141f;
+            background-image: url('8.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
-        /* --- STAGE CANVAS (AUTO-SCALES FOR ALL DEVICES) --- */
+        /* --- STAGE CANVAS (FULL-BLEED SCALING) --- */
         .page-stage {
             position: absolute;
             top: 50%;
@@ -23,10 +27,6 @@
             transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
             transform-origin: center center;
             overflow: hidden;
-            background-image: url('8.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -97,7 +97,7 @@
             if (stage) {
                 const scaleX = window.innerWidth / 1920;
                 const scaleY = window.innerHeight / 1080;
-                const scale = Math.min(scaleX, scaleY);
+                const scale = Math.max(scaleX, scaleY);
                 stage.style.setProperty('--stage-scale', scale);
             }
         }

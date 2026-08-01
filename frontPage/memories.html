@@ -34,7 +34,7 @@
             pointer-events: none;
         }
 
-        /* FIXED STAGE CANVAS CONTAINER (Auto-Scales on Desktop & Mobile) */
+        /* FIXED STAGE CANVAS CONTAINER (Auto-Scales Full Bleed) */
         .page-stage {
             position: absolute;
             top: 50%;
@@ -307,7 +307,7 @@
             if (stage) {
                 const scaleX = window.innerWidth / 1920;
                 const scaleY = window.innerHeight / 1080;
-                const scale = Math.min(scaleX, scaleY); 
+                const scale = Math.max(scaleX, scaleY); 
                 stage.style.setProperty('--stage-scale', scale);
             }
         }

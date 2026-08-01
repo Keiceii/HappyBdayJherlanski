@@ -9,6 +9,7 @@
             padding: 0;
             width: 100vw;
             height: 100vh;
+            height: 100dvh; 
             overflow: hidden; 
             box-sizing: border-box;
             background-color: #38141f;
@@ -156,6 +157,7 @@
             position: relative;
             z-index: 4;
             pointer-events: none;
+            contain: layout style;
         }
 
         .polaroid-card {
@@ -220,8 +222,12 @@
             transform: scale(1.05);
         }
 
-        /* --- MOBILE RESPONSIVE FIX --- */
+        /* --- MOBILE OPTIMIZATIONS --- */
         @media (max-width: 768px) {
+            .bg-flower, .sticker, .polaroid-card {
+                filter: none !important;
+            }
+
             html, body {
                 overflow-y: auto !important;
             }
@@ -256,8 +262,9 @@
             }
 
             .polaroid-card {
-                width: 100% !important;
-                height: 100% !important;
+                width: 800px !important;
+                height: 800px !important;
+                max-width: none !important;
             }
 
             .sticker {
@@ -297,39 +304,39 @@
         <div class="grid-container" id="gridContainer">
             
             <!-- Row 1 -->
-            <div class="polaroid-slot" style="grid-column: 2; grid-row: 1;"><img src="Compressed Image (1).png" class="polaroid-card" alt="Polaroid 47"></div>
-            <div class="polaroid-slot" style="grid-column: 3; grid-row: 1;"><img src="Compressed Image (2).png" class="polaroid-card" alt="Polaroid 48"></div>
-            <div class="polaroid-slot" style="grid-column: 5; grid-row: 1;"><img src="Compressed Image (3).png" class="polaroid-card" alt="Polaroid 49"></div>
-            <div class="polaroid-slot" style="grid-column: 6; grid-row: 1;"><img src="Compressed Image (4).png" class="polaroid-card" alt="Polaroid 50"></div>
+            <div class="polaroid-slot" style="grid-column: 2; grid-row: 1;"><img src="Compressed%20Image%20(1).png" class="polaroid-card" alt="Polaroid 47"></div>
+            <div class="polaroid-slot" style="grid-column: 3; grid-row: 1;"><img src="Compressed%20Image%20(2).png" class="polaroid-card" alt="Polaroid 48"></div>
+            <div class="polaroid-slot" style="grid-column: 5; grid-row: 1;"><img src="Compressed%20Image%20(3).png" class="polaroid-card" alt="Polaroid 49"></div>
+            <div class="polaroid-slot" style="grid-column: 6; grid-row: 1;"><img src="Compressed%20Image%20(4).png" class="polaroid-card" alt="Polaroid 50"></div>
 
             <!-- Row 2 -->
-            <div class="polaroid-slot" style="grid-column: 1; grid-row: 2;"><img src="Compressed Image (5).png" class="polaroid-card" alt="Polaroid 51"></div>
-            <div class="polaroid-slot" style="grid-column: 2; grid-row: 2;"><img src="Compressed Image (6).png" class="polaroid-card" alt="Polaroid 52"></div>
-            <div class="polaroid-slot" style="grid-column: 3; grid-row: 2;"><img src="Compressed Image (7).png" class="polaroid-card" alt="Polaroid 53"></div>
+            <div class="polaroid-slot" style="grid-column: 1; grid-row: 2;"><img src="Compressed%20Image%20(5).png" class="polaroid-card" alt="Polaroid 51"></div>
+            <div class="polaroid-slot" style="grid-column: 2; grid-row: 2;"><img src="Compressed%20Image%20(6).png" class="polaroid-card" alt="Polaroid 52"></div>
+            <div class="polaroid-slot" style="grid-column: 3; grid-row: 2;"><img src="Compressed%20Image%20(7).png" class="polaroid-card" alt="Polaroid 53"></div>
             
-            <!-- Row 2, Column 4: Adjust --shift-y (negative moves UP, positive moves DOWN) -->
+            <!-- Row 2, Column 4 -->
             <div class="polaroid-slot" style="grid-column: 4; grid-row: 2;">
-                <img src="Compressed Image (8).png" class="polaroid-card" style="--shift-x: 0px; --shift-y: 22px;" alt="Polaroid 54">
+                <img src="Compressed%20Image%20(8).png" class="polaroid-card" style="--shift-x: 0px; --shift-y: 22px;" alt="Polaroid 54">
             </div>
 
-            <div class="polaroid-slot" style="grid-column: 5; grid-row: 2;"><img src="Compressed Image.png" class="polaroid-card" alt="Polaroid 55"></div>
-            <div class="polaroid-slot" style="grid-column: 6; grid-row: 2;"><img src="Image from TinyPNG (1).png" class="polaroid-card" alt="Polaroid 56"></div>
-            <div class="polaroid-slot" style="grid-column: 7; grid-row: 2;"><img src="Image from TinyPNG (2).png" class="polaroid-card" alt="Polaroid 57"></div>
+            <div class="polaroid-slot" style="grid-column: 5; grid-row: 2;"><img src="Compressed%20Image.png" class="polaroid-card" alt="Polaroid 55"></div>
+            <div class="polaroid-slot" style="grid-column: 6; grid-row: 2;"><img src="Image%20from%20TinyPNG%20(1).png" class="polaroid-card" alt="Polaroid 56"></div>
+            <div class="polaroid-slot" style="grid-column: 7; grid-row: 2;"><img src="Image%20from%20TinyPNG%20(2).png" class="polaroid-card" alt="Polaroid 57"></div>
 
             <!-- Row 3 -->
-            <div class="polaroid-slot" style="grid-column: 2; grid-row: 3;"><img src="Image from TinyPNG (3).png" class="polaroid-card" alt="Polaroid 58"></div>
-            <div class="polaroid-slot" style="grid-column: 3; grid-row: 3;"><img src="Image from TinyPNG (4).png" class="polaroid-card" alt="Polaroid 59"></div>
-            <div class="polaroid-slot" style="grid-column: 4; grid-row: 3;"><img src="Image from TinyPNG (5).png" class="polaroid-card" alt="Polaroid 60"></div>
-            <div class="polaroid-slot" style="grid-column: 5; grid-row: 3;"><img src="Image from TinyPNG (6).png" class="polaroid-card" alt="Polaroid 61"></div>
-            <div class="polaroid-slot" style="grid-column: 6; grid-row: 3;"><img src="Image from TinyPNG (7).png" class="polaroid-card" alt="Polaroid 62"></div>
+            <div class="polaroid-slot" style="grid-column: 2; grid-row: 3;"><img src="Image%20from%20TinyPNG%20(3).png" class="polaroid-card" alt="Polaroid 58"></div>
+            <div class="polaroid-slot" style="grid-column: 3; grid-row: 3;"><img src="Image%20from%20TinyPNG%20(4).png" class="polaroid-card" alt="Polaroid 59"></div>
+            <div class="polaroid-slot" style="grid-column: 4; grid-row: 3;"><img src="Image%20from%20TinyPNG%20(5).png" class="polaroid-card" alt="Polaroid 60"></div>
+            <div class="polaroid-slot" style="grid-column: 5; grid-row: 3;"><img src="Image%20from%20TinyPNG%20(6).png" class="polaroid-card" alt="Polaroid 61"></div>
+            <div class="polaroid-slot" style="grid-column: 6; grid-row: 3;"><img src="Image%20from%20TinyPNG%20(7).png" class="polaroid-card" alt="Polaroid 62"></div>
 
             <!-- Row 4 -->
-            <div class="polaroid-slot" style="grid-column: 3; grid-row: 4;"><img src="Image from TinyPNG (8).png" class="polaroid-card" alt="Polaroid 63"></div>
-            <div class="polaroid-slot" style="grid-column: 4; grid-row: 4;"><img src="Image from TinyPNG (9).png" class="polaroid-card" alt="Polaroid 64"></div>
-            <div class="polaroid-slot" style="grid-column: 5; grid-row: 4;"><img src="Image from TinyPNG (10).png" class="polaroid-card" alt="Polaroid 65"></div>
+            <div class="polaroid-slot" style="grid-column: 3; grid-row: 4;"><img src="Image%20from%20TinyPNG%20(8).png" class="polaroid-card" alt="Polaroid 63"></div>
+            <div class="polaroid-slot" style="grid-column: 4; grid-row: 4;"><img src="Image%20from%20TinyPNG%20(9).png" class="polaroid-card" alt="Polaroid 64"></div>
+            <div class="polaroid-slot" style="grid-column: 5; grid-row: 4;"><img src="Image%20from%20TinyPNG%20(10).png" class="polaroid-card" alt="Polaroid 65"></div>
 
             <!-- Row 5 -->
-            <div class="polaroid-slot" style="grid-column: 4; grid-row: 5;"><img src="Image from TinyPNG.png" class="polaroid-card" alt="Polaroid 66"></div>
+            <div class="polaroid-slot" style="grid-column: 4; grid-row: 5;"><img src="Image%20from%20TinyPNG.png" class="polaroid-card" alt="Polaroid 66"></div>
 
         </div>
 

@@ -3,11 +3,12 @@
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Alex+Brush&display=swap" rel="stylesheet">
     <style>
-        body {
+        html, body {
             margin: 0;
             padding: 0;
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             background-color: #38141f; 
             overflow: hidden;
             position: relative;
@@ -116,7 +117,6 @@
         .page-loaded .flower-cutout   { animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.25s forwards; }
         .page-loaded .wax-seal        { animation: popInElement 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1.4s forwards; }
 
-        /* Lock opacity to 1 once entrance animations complete */
         .transitions-active .scrap-bg,
         .transitions-active .calendar-card,
         .transitions-active .hanging-lights,
@@ -129,7 +129,6 @@
             animation: none;
         }
 
-        /* --- COLLAGE CANVAS & SCRAP ELEMENTS --- */
         .collage-container {
             position: absolute;
             top: 0;
@@ -146,7 +145,6 @@
             filter: drop-shadow(4px 10px 15px rgba(0, 0, 0, 0.3));
         }
 
-        /* 1. Newspaper Border Frames (33.png) */
         .scrap-bg {
             position: absolute;
             width: 1920px;
@@ -157,7 +155,6 @@
             z-index: 2;
         }
 
-        /* 2. Hanging String Lights (34.png) */
         .hanging-lights {
             width: 1800px;
             top: -220px;
@@ -165,7 +162,6 @@
             z-index: 5;
         }
 
-        /* 3. August Calendar (35.png) */
         .calendar-card {
             width: 1800px;
             top: 50px;
@@ -173,7 +169,6 @@
             z-index: 3;
         }
 
-        /* 4. Photo Wrappers */
         .photo-wrapper {
             position: absolute;
             z-index: 4;
@@ -181,7 +176,6 @@
             will-change: transform, z-index;
         }
 
-        /* Smooth CSS transitions for click-to-expand */
         .transitions-active .photo-wrapper {
             transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
@@ -192,13 +186,11 @@
             transition: filter 0.3s ease, transform 0.3s ease;
         }
 
-        /* Hover Lift */
         .photo-wrapper:not(.open):hover .scrap {
             transform: scale(1.03) translateY(-6px);
             filter: drop-shadow(0px 15px 25px rgba(0, 0, 0, 0.45));
         }
 
-        /* BASE POSITIONS & INITIAL ROTATIONS */
         .photo-left-wrap {
             top: 280px;
             left: -630px;
@@ -213,13 +205,11 @@
         }
         .photo-right-wrap .scrap { width: 1700px; }
 
-        /* Default resting transform */
         .photo-left-wrap,
         .photo-right-wrap {
             transform: rotate(var(--base-rot)) translate(0, 0) scale(1);
         }
 
-        /* OPEN POP-OUT STATE POSITIONS */
         .photo-left-wrap.open {
             --target-x: 590px;
             --target-y: -300px;
@@ -238,13 +228,11 @@
             opacity: 1 !important;
         }
 
-        /* Drop z-index back down smoothly when closing */
         .photo-wrapper:not(.open) {
             z-index: 4;
             transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), z-index 0s 0.6s;
         }
 
-        /* 5. Decorative Stickers & Details */
         .flower-cutout {
             width: 1900px;
             bottom: -450px;
@@ -275,7 +263,6 @@
             z-index: 6;
         }
 
-        /* --- NAVIGATION BUTTON --- */
         .button-container {
             position: absolute;
             bottom: 40px;
@@ -299,14 +286,18 @@
         .click-btn:hover {
             transform: scale(1.05);
         }
+
+        @media (max-width: 768px) {
+            .bg-flower, .scrap {
+                filter: none !important;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- OVERLAY OUTSIDE STAGE TO COVER FULL SCREEN ON LOAD -->
     <div class="page-transition-overlay" id="pageOverlay"></div>
 
-    <!-- PARALLAX BACKGROUND -->
     <div class="background-container" id="parallaxBg">
         <img src="18.png" class="bg-flower flower-left" alt="Left Flower Base">
         <img src="19.png" class="bg-flower flower-center" alt="Center Layer Flower">
@@ -315,80 +306,55 @@
     
     <div class="tint-overlay"></div>
 
-    <!-- RESPONSIVE CANVAS STAGE WRAPPER -->
     <div class="page-stage">
-
         <div class="collage-container">
-
-            <!-- Torn Newspaper Frame Background -->
             <img src="33.png" class="scrap-bg" alt="Newspaper Border">
-
-            <!-- Hanging Lights -->
             <img src="34.png" class="scrap hanging-lights" alt="Hanging Lights">
-
-            <!-- Center August Calendar -->
             <img src="35.png" class="scrap calendar-card" alt="August Calendar">
 
-            <!-- Bottom Left Photo -->
             <div class="photo-wrapper photo-left-wrap" onclick="togglePhoto(this)">
                 <img src="37.png" class="scrap" alt="Memories Group Photo">
             </div>
 
-            <!-- Top Right Photo -->
             <div class="photo-wrapper photo-right-wrap" onclick="togglePhoto(this)">
                 <img src="39.png" class="scrap" alt="Birthday Candle Photo">
             </div>
 
-            <!-- Red Flower Accent -->
             <img src="36.png" class="scrap flower-cutout" alt="Red Flower Accent">
-
-            <!-- Heart Quote Tag -->
             <img src="38.png" class="scrap quote-tag" alt="Darling You Are All I Ever Wanted">
-
-            <!-- Red Star Stickers -->
             <img src="41.png" class="scrap star-stickers" alt="Red Star Stickers">
-
-            <!-- Wax Seal Accent -->
             <img src="40.png" class="scrap wax-seal" alt="Rose Wax Seal">
+        </div>
 
+        <div class="button-container">
+            <button class="click-btn" onclick="navigateToPage('choices.html')">BACK</button>
         </div>
     </div>
 
-    <!-- BACK BUTTON -->
-    <div class="button-container">
-        <button class="click-btn" onclick="navigateToPage('choices.html')">BACK</button>
-    </div>
-
     <script>
-        // Auto-Scale Canvas Function
         function updateStageScale() {
             const stage = document.querySelector('.page-stage');
             if (stage) {
                 const scaleX = window.innerWidth / 1920;
                 const scaleY = window.innerHeight / 1080;
-                const scale = Math.max(scaleX, scaleY); 
+                const scale = Math.min(scaleX, scaleY); 
                 stage.style.setProperty('--stage-scale', scale);
             }
         }
 
         window.addEventListener('resize', updateStageScale);
-        updateStageScale();
 
         window.addEventListener('DOMContentLoaded', () => {
             updateStageScale();
-            
-            // 1. Trigger page entrance animation
             setTimeout(() => {
                 document.body.classList.add('page-loaded');
             }, 100);
 
-            // 2. Enable click interactions & lock visibility once entrance finishes
             setTimeout(() => {
                 document.body.classList.add('transitions-active');
             }, 2000);
         });
 
-        // Parallax Mouse Motion
         const background = document.getElementById('parallaxBg');
         document.addEventListener('mousemove', (e) => {
             const mouseX = e.clientX / window.innerWidth;
@@ -400,7 +366,6 @@
             background.style.transform = `translate(${moveX}px, ${moveY}px)`;
         });
 
-        // Toggle Logic
         function togglePhoto(element) {
             if (!element.classList.contains('open')) {
                 closeAllPhotos();
@@ -416,7 +381,6 @@
             });
         }
 
-        // Navigation with Fade Transition
         function navigateToPage(url) {
             const overlay = document.getElementById('pageOverlay');
             if (overlay) {

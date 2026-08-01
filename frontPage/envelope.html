@@ -3,11 +3,12 @@
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Alex+Brush&display=swap" rel="stylesheet">
     <style>
-    body {
+    html, body {
         margin: 0;
         padding: 0;
         width: 100vw;
         height: 100vh;
+        height: 100dvh;
         background-color: #38141f; 
         overflow: hidden;
         position: relative;
@@ -20,7 +21,6 @@
         left: 50%;
         width: 1920px;  
         height: 1080px; 
-        
         transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
         transform-origin: center center;
         overflow: hidden;
@@ -51,8 +51,6 @@
     }
 
     /* --- ANIMATION ENGINES --- */
-    
-    /* 1. Base hidden states for elements */
     h1, 
     .cake, 
     .envelope-container, 
@@ -60,7 +58,6 @@
         opacity: 0;
     }
 
-    /* 2. Handwriting Draw-On Reveal Animation (Left to Right Clip Path) */
     @keyframes writeText {
         0% {
             opacity: 0;
@@ -75,7 +72,6 @@
         }
     }
 
-    /* 3. Pop-In Animation for non-text graphics */
     @keyframes popInCake {
         0% { opacity: 0; transform: scale(1.4) translateY(20px); }
         70% { opacity: 1; transform: scale(1.63) translateY(-3px); }
@@ -88,7 +84,6 @@
         100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
 
-    /* 4. Trigger Sequence on Page Load */
     .page-loaded h1 {
         animation: writeText 2s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
     }
@@ -105,7 +100,6 @@
         animation: writeText 1.5s cubic-bezier(0.4, 0, 0.2, 1) 2s forwards;
     }
 
-    /* Headline */
     h1 {
         font-family: 'Parisienne', cursive;
         color: #000000;
@@ -124,19 +118,17 @@
         will-change: clip-path, opacity;
     }
 
-    /* 1. Cake Sketch */
     .cake {
         position: absolute;
-        left: -15%;       
-        top: 33%;       
-        width: 1000px;   
+        left: -15%;        
+        top: 33%;        
+        width: 1000px;    
         height: auto;
         transform: scale(1.6); 
         transform-origin: left center; 
         transition: opacity 0.5s ease;
     }
 
-    /* 2. Interactive Envelope & Letter Wrapper */
     .envelope-container {
         position: absolute;
         left: 50%;
@@ -145,16 +137,15 @@
         width: 600px; 
         height: 500px; 
         cursor: pointer;
-        position: relative;
     }
 
     .envelope-back {
         position: absolute;
         z-index: 1;
-        width: 1500px;       
+        width: 1500px;        
         height: auto;
         left: 50%;          
-        top: 45%;           
+        top: 45%;            
         transform: translate(-50%, -50%);
         transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease;
     }
@@ -162,7 +153,7 @@
     .envelope-front {
         position: absolute;
         z-index: 3;
-        width: 1500px;       
+        width: 1500px;        
         height: auto;
         left: 50%;          
         top: 62%;         
@@ -201,7 +192,6 @@
         will-change: transform, opacity;
     }
 
-    /* Letter Open/Close Animations */
     .envelope-container.open .letter {
         animation: popOutAndRead 2.2s forwards cubic-bezier(0.25, 1, 0.5, 1);
         pointer-events: auto;
@@ -265,12 +255,11 @@
     @keyframes floralBounceIn { 0% { opacity: 0; transform: scale(1.15); } 100% { opacity: 1; transform: scale(1); } }
     @keyframes floralFadeOut { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.08); } }
 
-    /* --- FIXED CLICK HINT WRAPPER & SPAN --- */
     .click-hint {
         position: absolute;
         right: 12%;
         top: 56%;
-        width: 500px; /* Gives plenty of width so text never clips */
+        width: 500px;
         text-align: left;
     }
 
@@ -280,7 +269,7 @@
         color: #333333;
         display: inline-block;
         white-space: nowrap;
-        padding-right: 20px; /* Extra padding so the exclamation mark has clearance */
+        padding-right: 20px;
         will-change: clip-path, opacity;
     }
 
@@ -311,10 +300,8 @@
 </head>
 <body>
 
-    <!-- OVERLAY OUTSIDE STAGE TO COVER FULL SCREEN ON LOAD -->
     <div class="page-transition-overlay" id="pageOverlay"></div>
 
-    <!-- STAGE WRAPPER -->
     <div class="page-stage">
         <h1>
             Happy Birthday my love!<br>
@@ -336,7 +323,6 @@
         </div>
     </div>
 
-    <!-- BUTTONS OUTSIDE STAGE TO PREVENT CROPPING -->
     <div class="button-container">
         <button class="click-btn" onclick="navigateToPage('index.html')">BACK</button>
         <button class="click-btn" onclick="navigateToPage('choices.html')">NEXT</button>
@@ -348,13 +334,12 @@
         if (stage) {
             const scaleX = window.innerWidth / 1920;
             const scaleY = window.innerHeight / 1080;
-            const scale = Math.max(scaleX, scaleY); 
+            const scale = Math.min(scaleX, scaleY); 
             stage.style.setProperty('--stage-scale', scale);
         }
     }
 
     window.addEventListener('resize', updateStageScale);
-    updateStageScale();
 
     window.addEventListener('DOMContentLoaded', () => {
         updateStageScale();

@@ -2,33 +2,37 @@
 <html>
 <head>
     <style>
-        /* Container that locks the exact design ratio (16:9 widescreen) */
-.page-stage {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 1920px;  /* Base canvas width */
-    height: 1080px; /* Base canvas height */
-    transform: translate(-50%, -50%) scale(calc(min(100vw / 1920, 100vh / 1080)));
-    transform-origin: center center;
-    overflow: hidden;
-}
-        body {
+        html, body {
             margin: 0;
+            padding: 0;
+            width: 100vw;
             height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            box-sizing: border-box;
+            background-color: #38141f;
+        }
+
+        /* --- STAGE CANVAS (AUTO-SCALES FOR ALL DEVICES) --- */
+        .page-stage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1920px;
+            height: 1080px;
+            transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+            transform-origin: center center;
+            overflow: hidden;
             background-image: url('8.png');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            background-attachment: fixed;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
-            overflow: hidden;
         }
 
-        /* --- THE PERFECTED ENGINE CONTROLS --- */
+        /* --- TRANSITION OVERLAY --- */
         .page-transition-overlay {
             position: fixed;
             top: 0;
@@ -37,12 +41,11 @@
             height: 100vh;
             background-color: #38141f; 
             z-index: 9999;             
-            pointer-events: auto; /* Block clicks while transitioning */
-            opacity: 1; /* CRITICAL: Starts completely solid by default */
+            pointer-events: auto;
+            opacity: 1;
             transition: opacity 0.4s ease-in-out;
         }
 
-        /* Only unblocks the screen and fades away once JavaScript gives the green light */
         .page-loaded .page-transition-overlay {
             opacity: 0;
             pointer-events: none;
@@ -80,15 +83,29 @@
 
     <div class="page-transition-overlay" id="pageOverlay"></div>
 
-    <img src="9.png" alt="Birthday Cake">
-    
-    <button class="click-btn" onclick="navigateToPage('envelope.html')">
-        CLICK ME!
-    </button>
+    <div class="page-stage">
+        <img src="9.png" alt="Birthday Cake">
+        
+        <button class="click-btn" onclick="navigateToPage('envelope.html')">
+            CLICK ME!
+        </button>
+    </div>
 
     <script>
-        // Fades the entry curtain out cleanly on load
+        function updateStageScale() {
+            const stage = document.querySelector('.page-stage');
+            if (stage) {
+                const scaleX = window.innerWidth / 1920;
+                const scaleY = window.innerHeight / 1080;
+                const scale = Math.min(scaleX, scaleY);
+                stage.style.setProperty('--stage-scale', scale);
+            }
+        }
+
+        window.addEventListener('resize', updateStageScale);
+
         window.addEventListener('DOMContentLoaded', () => {
+            updateStageScale();
             setTimeout(() => {
                 document.body.classList.add('page-loaded');
             }, 50); 
@@ -98,11 +115,10 @@
             const overlay = document.getElementById('pageOverlay');
             if (overlay) {
                 overlay.style.pointerEvents = 'auto';
-                overlay.style.opacity = '1'; // Drops curtain down smoothly
-                
+                overlay.style.opacity = '1';
                 setTimeout(() => {
                     window.location.href = url;
-                }, 400); // Swaps pages right as it hits full opacity
+                }, 400);
             } else {
                 window.location.href = url;
             }

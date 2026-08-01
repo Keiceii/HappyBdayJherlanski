@@ -3,29 +3,31 @@
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Alex+Brush&display=swap" rel="stylesheet">
     <style>
-        /* Container that locks the exact design ratio (16:9 widescreen) */
-.page-stage {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 1920px;  /* Base canvas width */
-    height: 1080px; /* Base canvas height */
-    transform: translate(-50%, -50%) scale(calc(min(100vw / 1920, 100vh / 1080)));
-    transform-origin: center center;
-    overflow: hidden;
-}
-        /* Base Setup */
         html, body {
-    margin: 0;
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden; /* Stops Chrome from adding scrollbars that shrink the canvas */
-    box-sizing: border-box;
-    background-color: #38141f;
-}
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden; 
+            box-sizing: border-box;
+            background-color: #38141f;
+        }
 
-        /* --- THE PERFECTED ENGINE CONTROLS --- */
+        /* --- FIXED STAGE CANVAS CONTAINER --- */
+        .page-stage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1920px;  
+            height: 1080px; 
+            transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
+            transform-origin: center center;
+            overflow: hidden;
+            z-index: 3;
+        }
+
+        /* --- TRANSITION OVERLAY --- */
         .page-transition-overlay {
             position: fixed;
             top: 0;
@@ -35,7 +37,7 @@
             background-color: #38141f; 
             z-index: 9999;             
             pointer-events: auto;
-            opacity: 1; /* Starts completely solid by default */
+            opacity: 1; 
             transition: opacity 0.4s ease-in-out;
         }
 
@@ -44,7 +46,7 @@
             pointer-events: none;
         }
 
-        /* --- THE PARALLAX BACKGROUND LAYER ENGINE --- */
+        /* --- PARALLAX BACKGROUND LAYER ENGINE --- */
         .background-container {
             position: fixed;
             top: -10%;
@@ -66,7 +68,7 @@
         .flower-center { width: 2150px; left: 50%; top: -15%; transform: translateX(-50%); z-index: 2; }
         .flower-right { width: 2000px; right: -25%; bottom: -20%; z-index: 1; }
 
-        /* --- THE RED TRANSLUCENT OVERLAY --- */
+        /* --- RED TRANSLUCENT OVERLAY --- */
         .tint-overlay {
             position: fixed;
             top: 0;
@@ -78,11 +80,11 @@
             pointer-events: none; 
         }
 
-        /* --- THE FOREGROUND USER INTERFACE --- */
+        /* --- FOREGROUND USER INTERFACE --- */
         .ui-wrapper {
             position: relative;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             z-index: 3; 
             display: flex;
             flex-direction: column;
@@ -94,7 +96,7 @@
         .choices-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: -20px;           
+            gap: 20px;            
             width: 85%;          
             max-width: 1700px;    
             margin: auto; 
@@ -162,10 +164,16 @@
             cursor: pointer;
             font-family: serif;
             box-shadow: 0 4px 10px rgba(0,0,0,0.12);
-            transition: transform 0.3s x ease-out;
+            transition: transform 0.3s ease-out;
         }
 
         .click-btn:hover { transform: scale(1.05); }
+
+        @media (max-width: 768px) {
+            .bg-flower, .choice-img {
+                filter: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -180,29 +188,44 @@
     
     <div class="tint-overlay"></div>
 
-    <div class="ui-wrapper">
-        <div class="choices-container">
-            <div class="choice-card" onclick="selectChoice('mouse')">
-                <img src="21.png" class="choice-img" alt="Mouse Character Choice">
+    <div class="page-stage">
+        <div class="ui-wrapper">
+            <div class="choices-container">
+                <div class="choice-card" onclick="selectChoice('mouse')">
+                    <img src="21.png" class="choice-img" alt="Mouse Character Choice">
+                </div>
+                <div class="choice-card" onclick="selectChoice('party-cat')">
+                    <img src="22.png" class="choice-img" alt="Center Cat Choice">
+                </div>
+                <div class="choice-card" onclick="selectChoice('ribbon-cat')">
+                    <img src="23.png" class="choice-img" alt="Right Cat Choice">
+                </div>
             </div>
-            <div class="choice-card" onclick="selectChoice('party-cat')">
-                <img src="22.png" class="choice-img" alt="Center Cat Choice">
-            </div>
-            <div class="choice-card" onclick="selectChoice('ribbon-cat')">
-                <img src="23.png" class="choice-img" alt="Right Cat Choice">
-            </div>
-        </div>
 
-        <h2 class="cta-text">Click on each one!</h2>
+            <h2 class="cta-text">Click on each one!</h2>
 
-        <div class="button-container">
-            <button class="click-btn" onclick="navigateToPage('envelope.html')">BACK</button>
-            <button class="click-btn" onclick="navigateToPage('index.html')">HOME</button>
+            <div class="button-container">
+                <button class="click-btn" onclick="navigateToPage('envelope.html')">BACK</button>
+                <button class="click-btn" onclick="navigateToPage('index.html')">HOME</button>
+            </div>
         </div>
     </div>
 
     <script>
+        function updateStageScale() {
+            const stage = document.querySelector('.page-stage');
+            if (stage) {
+                const scaleX = window.innerWidth / 1920;
+                const scaleY = window.innerHeight / 1080;
+                const scale = Math.min(scaleX, scaleY);
+                stage.style.setProperty('--stage-scale', scale);
+            }
+        }
+
+        window.addEventListener('resize', updateStageScale);
+
         window.addEventListener('DOMContentLoaded', () => {
+            updateStageScale();
             setTimeout(() => {
                 document.body.classList.add('page-loaded');
             }, 50);

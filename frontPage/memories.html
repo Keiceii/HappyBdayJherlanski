@@ -34,7 +34,7 @@
             pointer-events: none;
         }
 
-        /* FIXED STAGE CANVAS CONTAINER (Auto-Scales) */
+        /* FIXED STAGE CANVAS CONTAINER (Auto-Scales on Desktop & Mobile) */
         .page-stage {
             position: absolute;
             top: 50%;
@@ -84,17 +84,21 @@
         /* --- POLAROID HEART GRID CONTAINER --- */
         .grid-container {
             position: absolute;
-            top: 48%;
-            left: 42%;
-            transform: translate(-50%, -50%) scale(1.9);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1.05);
             display: grid;
-            grid-template-columns: repeat(7, 80px);
-            grid-template-rows: repeat(5, 100px);
-            row-gap: 8px;       
-            column-gap: 8px;
+            grid-template-columns: repeat(7, 180px);
+            grid-template-rows: repeat(5, 200px);
+            row-gap: 2px;       
+            column-gap: 2px;
             z-index: 4;
             justify-content: center;
+            align-content: center;
+            justify-items: center;
             align-items: center;
+            margin: auto;
+            width: max-content;
         }
 
         /* STAGGERED ENTRANCE ANIMATIONS */
@@ -148,8 +152,8 @@
 
         /* --- POLAROID SLOT & CARD --- */
         .polaroid-slot {
-            width: 220px;
-            height: 250px;
+            width: 180px;
+            height: 200px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -171,7 +175,7 @@
             backface-visibility: hidden;
             -webkit-backface-visibility: hidden;
 
-            --base-scale: 1.15; 
+            --base-scale: 1.25; 
             transform: translate3d(var(--shift-x, 0px), var(--shift-y, 0px), 0px) scale(var(--base-scale));
         }
 
@@ -197,7 +201,7 @@
 
         /* --- NAVIGATION BUTTONS --- */
         .button-container {
-            position: fixed;
+            position: absolute;
             bottom: 40px;             
             right: 40px;
             z-index: 9999;
@@ -222,63 +226,10 @@
             transform: scale(1.05);
         }
 
-        /* --- MOBILE OPTIMIZATIONS --- */
+        /* --- MOBILE PERFORMANCE OVERRIDES --- */
         @media (max-width: 768px) {
             .bg-flower, .sticker, .polaroid-card {
                 filter: none !important;
-            }
-
-            html, body {
-                overflow-y: auto !important;
-            }
-
-            .page-stage {
-                position: relative !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100vw !important;
-                height: auto !important;
-                transform: none !important;
-                padding: 30px 10px 100px 10px;
-                box-sizing: border-box;
-            }
-
-            .grid-container {
-                position: relative !important;
-                top: 0 !important;
-                left: 0 !important;
-                transform: none !important;
-                grid-template-columns: repeat(2, 1fr) !important;
-                grid-template-rows: auto !important;
-                gap: 15px !important;
-                width: 100% !important;
-            }
-
-            .polaroid-slot {
-                grid-column: auto !important;
-                grid-row: auto !important;
-                width: 100% !important;
-                height: 220px !important;
-            }
-
-            .polaroid-card {
-                width: 100% !important;
-                height: 100% !important;
-                max-width: 100% !important;
-            }
-
-            .sticker {
-                display: none !important;
-            }
-
-            .button-container {
-                bottom: 25px;
-                right: 25px;
-            }
-
-            .click-btn {
-                padding: 12px 30px;
-                font-size: 20px;
             }
         }
     </style>
@@ -365,7 +316,6 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             updateStageScale();
-            // Trigger page entrance fade-in
             setTimeout(() => {
                 document.body.classList.add('page-loaded');
             }, 100);
@@ -407,4 +357,3 @@
 
 </body>
 </html>
-

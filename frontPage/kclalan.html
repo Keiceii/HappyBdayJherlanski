@@ -3,27 +3,28 @@
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Parisienne&family=Alex+Brush&display=swap" rel="stylesheet">
     <style>
-        /* Container that locks the exact design ratio (16:9 widescreen) */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden; 
+            box-sizing: border-box;
+            background-color: #38141f;
+        }
+
+        /* --- FIXED STAGE CANVAS CONTAINER --- */
         .page-stage {
             position: absolute;
             top: 50%;
             left: 50%;
             width: 1920px;  
             height: 1080px; 
-            transform: translate(-50%, -50%) scale(calc(min(100vw / 1920, 100vh / 1080)));
+            transform: translate(-50%, -50%) scale(var(--stage-scale, 1));
             transform-origin: center center;
             overflow: hidden;
-        }
-
-        /* Base Setup */
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden; 
-            box-sizing: border-box;
-            background-color: #38141f;
+            z-index: 3;
         }
 
         /* --- TRANSITION ENGINE --- */
@@ -82,8 +83,8 @@
         /* --- FOREGROUND WRAPPER --- */
         .ui-wrapper {
             position: relative;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             z-index: 3; 
             box-sizing: border-box;
         }
@@ -104,7 +105,6 @@
             filter: drop-shadow(3px 8px 12px rgba(0, 0, 0, 0.35));
         }
 
-        /* --- INTERACTIVE PHOTO WRAPPERS (Precise Hover Boxes) --- */
         .photo-wrapper {
             position: absolute;
             cursor: pointer;
@@ -114,7 +114,6 @@
             justify-content: center;
         }
 
-        /* Giant image inside wrapper stays uncropped and centered */
         .photo-wrapper .scrap {
             position: absolute;
             top: 50%;
@@ -123,7 +122,6 @@
             pointer-events: none; 
         }
 
-        /* HOVER ACTION FOR PHOTO WRAPPERS */
         .photo-wrapper:hover {
             transform: scale(1.08) translateY(-10px) !important;
             z-index: 20 !important; 
@@ -133,9 +131,6 @@
             filter: drop-shadow(0px 15px 25px rgba(0, 0, 0, 0.5));
         }
 
-        /* --- POP-IN ANIMATION ENGINE --- */
-        
-        /* 1. Base hidden state for all animated elements */
         .camera,
         .photo-wrapper,
         .favorite-sign,
@@ -146,7 +141,6 @@
             opacity: 0;
         }
 
-        /* 2. Keyframes for the gentle spring pop effect */
         @keyframes popIn {
             0% {
                 opacity: 0;
@@ -162,7 +156,6 @@
             }
         }
 
-        /* 3. Trigger animation when page curtain finishes lifting */
         .page-loaded .camera,
         .page-loaded .photo-wrapper,
         .page-loaded .favorite-sign,
@@ -173,7 +166,6 @@
             animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        /* 4. Staggered timing order for each item */
         .page-loaded .camera               { animation-delay: 0.2s; }
         .page-loaded .wrapper-top-left     { animation-delay: 0.35s; }
         .page-loaded .wrapper-bottom-left  { animation-delay: 0.5s; }
@@ -184,9 +176,6 @@
         .page-loaded .curly-ribbon         { animation-delay: 1.25s; }
         .page-loaded .ribbon-bow           { animation-delay: 1.4s; }
 
-        /* --- SIZING & POSITIONS --- */
-        
-        /* 1. Retro Camera (27.png) */
         .camera {
             width: 1800px;
             top: -400px;
@@ -194,7 +183,6 @@
             z-index: 2;
         }
 
-        /* 2. Top Polaroid Box (24.png) */
         .wrapper-top-left {
             width: 280px;
             height: 430px;
@@ -206,7 +194,6 @@
             width: 1750px;
         }
 
-        /* 3. Bottom Polaroid Box (25.png) */
         .wrapper-bottom-left {
             width: 300px;
             height: 410px;
@@ -218,7 +205,6 @@
             width: 1750px;
         }
 
-        /* 4. Vertical Photo Strip Box (26.png) */
         .wrapper-photo-strip {
             width: 200px;
             height: 570px;
@@ -230,7 +216,6 @@
             width: 1750px;
         }
 
-        /* 5. Decorative Overlays */
         .favorite-sign {
             width: 1600px;
             top: -90px;
@@ -271,7 +256,6 @@
             pointer-events: none; 
         }
 
-        /* --- NAVIGATION BUTTON --- */
         .button-container {
             position: absolute;
             bottom: 40px;
@@ -295,6 +279,12 @@
         .click-btn:hover {
             transform: scale(1.05);
         }
+
+        @media (max-width: 768px) {
+            .bg-flower, .scrap {
+                filter: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -309,42 +299,51 @@
     
     <div class="tint-overlay"></div>
 
-    <div class="ui-wrapper">
+    <div class="page-stage">
+        <div class="ui-wrapper">
+            <div class="collage-container">
+                <img src="27.png" class="scrap camera" alt="Retro Camera">
+                
+                <div class="photo-wrapper wrapper-top-left">
+                    <img src="24.png" class="scrap polaroid-top-left" alt="Polaroid with Pin">
+                </div>
 
-        <!-- COLLAGE LAYOUT CONTAINER -->
-        <div class="collage-container">
-            <img src="27.png" class="scrap camera" alt="Retro Camera">
-            
-            <!-- PHOTO 1 WRAPPER -->
-            <div class="photo-wrapper wrapper-top-left">
-                <img src="24.png" class="scrap polaroid-top-left" alt="Polaroid with Pin">
+                <div class="photo-wrapper wrapper-bottom-left">
+                    <img src="25.png" class="scrap polaroid-bottom-left" alt="Polaroid Bottom Left">
+                </div>
+
+                <div class="photo-wrapper wrapper-photo-strip">
+                    <img src="26.png" class="scrap photo-strip" alt="Photo Strip Right">
+                </div>
+
+                <img src="29.png" class="scrap favorite-sign" alt="Favorite Person Sign">
+                <img src="30.png" class="scrap ribbon-bow" alt="Black Ribbon">
+                <img src="28.png" class="scrap drawn-star" alt="Drawn Star">
+                <img src="31.png" class="scrap sparkles" alt="Sparkles Cutout">
+                <img src="32.png" class="scrap curly-ribbon" alt="Curly Heart Ribbon">
             </div>
 
-            <!-- PHOTO 2 WRAPPER -->
-            <div class="photo-wrapper wrapper-bottom-left">
-                <img src="25.png" class="scrap polaroid-bottom-left" alt="Polaroid Bottom Left">
+            <div class="button-container">
+                <button class="click-btn" onclick="navigateToPage('choices.html')">BACK</button>
             </div>
-
-            <!-- PHOTO 3 STRIP WRAPPER -->
-            <div class="photo-wrapper wrapper-photo-strip">
-                <img src="26.png" class="scrap photo-strip" alt="Photo Strip Right">
-            </div>
-
-            <img src="29.png" class="scrap favorite-sign" alt="Favorite Person Sign">
-            <img src="30.png" class="scrap ribbon-bow" alt="Black Ribbon">
-            <img src="28.png" class="scrap drawn-star" alt="Drawn Star">
-            <img src="31.png" class="scrap sparkles" alt="Sparkles Cutout">
-            <img src="32.png" class="scrap curly-ribbon" alt="Curly Heart Ribbon">
         </div>
-
-        <div class="button-container">
-            <button class="click-btn" onclick="navigateToPage('choices.html')">BACK</button>
-        </div>
-
     </div>
 
     <script>
+        function updateStageScale() {
+            const stage = document.querySelector('.page-stage');
+            if (stage) {
+                const scaleX = window.innerWidth / 1920;
+                const scaleY = window.innerHeight / 1080;
+                const scale = Math.min(scaleX, scaleY);
+                stage.style.setProperty('--stage-scale', scale);
+            }
+        }
+
+        window.addEventListener('resize', updateStageScale);
+
         window.addEventListener('DOMContentLoaded', () => {
+            updateStageScale();
             setTimeout(() => {
                 document.body.classList.add('page-loaded');
             }, 50);

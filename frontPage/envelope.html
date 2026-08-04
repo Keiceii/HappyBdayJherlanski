@@ -273,26 +273,27 @@
         will-change: clip-path, opacity;
     }
 
+    /* --- NAVIGATION BUTTONS (Placed inside stage canvas for responsive scaling) --- */
     .button-container {
-        position: fixed; 
-        bottom: 30px;
-        right: 30px;
+        position: absolute; 
+        bottom: 40px;
+        right: 40px;
         display: flex;
-        gap: 15px;
-        z-index: 999; 
+        gap: 20px;
+        z-index: 20; 
     }
 
     .click-btn {
-        background-color: #f5f5f5;
-        color: #7a2e2e;
+        background-color: #ffffff;
+        color: #5c1b26;
         border: none;
-        border-radius: 50px;
-        padding: 18px 45px;
-        font-size: 30px;
+        border-radius: 60px;
+        padding: 18px 50px;
+        font-size: 28px;
         cursor: pointer;
         font-family: serif;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        transition: transform 0.3s;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease-out;
     }
 
     .click-btn:hover { transform: scale(1.05); }
@@ -321,11 +322,12 @@
         <div class="click-hint">
             <span>Click the envelope!</span>
         </div>
-    </div>
 
-    <div class="button-container">
-        <button class="click-btn" onclick="navigateToPage('index.html')">BACK</button>
-        <button class="click-btn" onclick="navigateToPage('choices.html')">NEXT</button>
+        <!-- BUTTON CONTAINER MOVED INSIDE STAGE CANVAS -->
+        <div class="button-container">
+            <button class="click-btn" onclick="navigateToPage('index.html')">BACK</button>
+            <button class="click-btn" onclick="navigateToPage('choices.html')">NEXT</button>
+        </div>
     </div>
 
     <script>

@@ -166,16 +166,21 @@
         transform: translate(-50%, -50%) scale(1.05);
     }
 
+    /* HIGH RESOLUTION CRISP LETTER SETTINGS */
     .letter {
         position: absolute;
         z-index: 2; 
         opacity: 1; 
-        width: 600px; 
+        width: 1400px; 
         height: auto;
         left: 48.5%;
         top: 39%;
-        transform: translate(-50%, -58%) scale(1.5); 
-        will-change: transform, opacity, filter;
+        transform: translate(-50%, -58%) scale(0.64); 
+        will-change: transform, opacity;
+
+        image-rendering: -webkit-optimize-contrast;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
     }
 
     .floral-overlay {
@@ -238,18 +243,19 @@
         transition-delay: 0.4s;
     }
 
+    /* KEYFRAMES ADJUSTED FOR CRISP HIGH DENSITY SCALING */
     @keyframes popOutAndRead {
-        0% { opacity: 1; transform: translate(-50%, -58%) scale(1.5); z-index: 2; }
-        35% { opacity: 1; transform: translate(-50%, -150%) scale(1.5); z-index: 2; }
+        0% { opacity: 1; transform: translate(-50%, -58%) scale(0.64); z-index: 2; }
+        35% { opacity: 1; transform: translate(-50%, -130%) scale(0.64); z-index: 2; }
         45% { z-index: 10; }
-        100% { z-index: 10; opacity: 1; transform: translate(-50%, -50%) scale(3.2); filter: drop-shadow(0px 15px 30px rgba(0, 0, 0, 0.3)); }
+        100% { z-index: 10; opacity: 1; transform: translate(-50%, -50%) scale(1.35); filter: drop-shadow(0px 15px 30px rgba(0, 0, 0, 0.3)); }
     }
 
     @keyframes putBackInEnvelope {
-        0% { z-index: 10; opacity: 1; transform: translate(-50%, -50%) scale(3.2); }
-        45% { z-index: 10; opacity: 1; transform: translate(-50%, -150%) scale(1.5); }
+        0% { z-index: 10; opacity: 1; transform: translate(-50%, -50%) scale(1.35); }
+        45% { z-index: 10; opacity: 1; transform: translate(-50%, -130%) scale(0.64); }
         60% { z-index: 2; }
-        100% { opacity: 1; transform: translate(-50%, -58%) scale(1.5); z-index: 2; }
+        100% { opacity: 1; transform: translate(-50%, -58%) scale(0.64); z-index: 2; }
     }
 
     @keyframes floralBounceIn { 0% { opacity: 0; transform: scale(1.15); } 100% { opacity: 1; transform: scale(1); } }
@@ -273,7 +279,7 @@
         will-change: clip-path, opacity;
     }
 
-    /* --- NAVIGATION BUTTONS (Placed inside stage canvas for responsive scaling) --- */
+    /* --- NAVIGATION BUTTONS --- */
     .button-container {
         position: absolute; 
         bottom: 40px;
@@ -323,7 +329,7 @@
             <span>Click the envelope!</span>
         </div>
 
-        <!-- BUTTON CONTAINER MOVED INSIDE STAGE CANVAS -->
+        <!-- BUTTON CONTAINER INSIDE STAGE CANVAS -->
         <div class="button-container">
             <button class="click-btn" onclick="navigateToPage('index.html')">BACK</button>
             <button class="click-btn" onclick="navigateToPage('choices.html')">NEXT</button>
